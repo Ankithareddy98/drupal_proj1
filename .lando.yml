@@ -1,0 +1,4 @@
+name: drupal-1
+recipe: drupal10
+config:
+  webroot: web
