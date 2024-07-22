@@ -1,0 +1,7 @@
+first_module.demo:
+  path: "/hello"
+  defaults:
+    _title: "Displaying basic msg"
+    _controller: '\Drupal\first_module\Controller\FirstController::content'
+  requirements:
+    _permission: "access content"

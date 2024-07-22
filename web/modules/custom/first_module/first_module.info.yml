@@ -1,0 +1,5 @@
+name: 'first_module'
+type: module
+description: 'Practice module dev'
+package: Custom
+core_version_requirement: ^10 || ^11
