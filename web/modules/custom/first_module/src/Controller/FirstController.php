@@ -76,13 +76,16 @@ class FirstController extends ControllerBase {
    *   A render array containing the message and the list of basic pages.
    */
   public function content() {
-    // Part 1: Hello World message.
-    $render_array = [
-      'hello_world' => [
-        '#type' => 'markup',
-        '#markup' => t('Hello World'),
-      ],
-    ];
+    // Part 1: Hello World message. (rendered using controller)
+    // $render_array = [
+    //   'hello_world' => [
+    //     '#type' => 'markup',
+    //     '#markup' => t('Hello World'),
+    //   ],
+    // ];
+
+    // Part 1. rendered using template
+    $hello_world = 'Welcome to Drupal 10 !!!';
 
     // Part 2: Titles and bodies of all Basic Pages. Static call (::)
     // Initialize the query for 'node' entity type.
@@ -109,22 +112,40 @@ class FirstController extends ControllerBase {
     // Load the nodes based on the IDs returned.
     $nodes = Node::loadMultiple($nids);
 
-    // Prepare the items for the list.
-    $items = [];
-    foreach ($nodes as $node) {
-      $items[] = [
-        '#markup' => '<h2>' . $node->getTitle() . '</h2><p>' . $node->body->value . '</p>',
-      ];
-    }
+    // { Prepare the items for the list.
+    // $items = [];
+    // foreach ($nodes as $node) {
+    //   $items[] = [
+    //     '#markup' => '<h2>' . $node->getTitle() . '</h2><p>' . $node->body->value . '</p>',
+    //   ];
+    // }
 
-    // Add the list of basic pages to the render array.
-    $render_array['basic_pages'] = [
-      '#theme' => 'item_list',
-      '#items' => $items,
-    ];
+    // Add the list of basic pages to the render array. to display using controller
+    // $render_array['basic_pages'] = [
+    //   '#theme' => 'item_list',
+    //   '#items' => $items,
+    // ];
     //dump($items);
 
     // Return the combined render array.
-    return $render_array;
+    //return $render_array; }
+
+    // Render using twig template
+
+    //Prepare the items for the list
+
+    $items = [];
+    foreach ($nodes as $node) {
+        $items[] = [
+            'title' => strip_tags($node->getTitle()),
+            'body' => strip_tags($node->body->value),
+        ];
+    }
+
+    return [
+        '#theme' => 'first_module_template',
+        '#first_msg' => $hello_world,
+        '#items' => $items,
+    ];
   }
 }
