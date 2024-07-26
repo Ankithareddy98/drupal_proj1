@@ -1,0 +1,3 @@
+services:
+  first_module.dateformatter:
+    class: 'Drupal\first_module\Service\CustomDateFormatterService'

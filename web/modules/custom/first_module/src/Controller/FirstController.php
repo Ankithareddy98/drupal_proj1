@@ -57,17 +57,22 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use \Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\Entity\Node;
+use Drupal\first_module\Service\CustomDateFormatterService;
 
 class FirstController extends ControllerBase {
 
     protected $entityQuery;
+    protected $dateFormatter;
 
-    public function __construct(EntityTypeManagerInterface $entity_query) { //$entity_query is another variable which is type hinted with queryFactroy
+    public function __construct(EntityTypeManagerInterface $entity_query, CustomDateFormatterService $date_formatter) { //$entity_query is another variable which is type hinted with queryFactroy
         $this->entityQuery = $entity_query;
+        $this->dateFormatter = $date_formatter;
     }
 
     public static function create(ContainerInterface $container) {
-        return new static ($container->get('entity_type.manager'));
+        return new static (
+          $container->get('entity_type.manager'),
+          $container->get('first_module.dateformatter'));
     }
   /**
    * Returns a page with "Hello World" and titles and bodies of all Basic Pages.
@@ -76,13 +81,9 @@ class FirstController extends ControllerBase {
    *   A render array containing the message and the list of basic pages.
    */
   public function content() {
-    // Part 1: Hello World message.
-    $render_array = [
-      'hello_world' => [
-        '#type' => 'markup',
-        '#markup' => t('Hello World'),
-      ],
-    ];
+
+    // Part 1. rendered using template
+    $hello_world = 'Welcome to Drupal 10 !!!';
 
     // Part 2: Titles and bodies of all Basic Pages. Static call (::)
     // Initialize the query for 'node' entity type.
@@ -108,23 +109,53 @@ class FirstController extends ControllerBase {
         ->execute();
     // Load the nodes based on the IDs returned.
     $nodes = Node::loadMultiple($nids);
+    //dump($nodes);
+    
 
-    // Prepare the items for the list.
-    $items = [];
-    foreach ($nodes as $node) {
-      $items[] = [
-        '#markup' => '<h2>' . $node->getTitle() . '</h2><p>' . $node->body->value . '</p>',
-      ];
-    }
+    // dump($timeSTAMP);
 
-    // Add the list of basic pages to the render array.
-    $render_array['basic_pages'] = [
-      '#theme' => 'item_list',
-      '#items' => $items,
-    ];
+    // { Prepare the items for the list.
+    // $items = [];
+    // foreach ($nodes as $node) {
+    //   $items[] = [
+    //     '#markup' => '<h2>' . $node->getTitle() . '</h2><p>' . $node->body->value . '</p>',
+    //   ];
+    // }
+
+    // Add the list of basic pages to the render array. to display using controller
+    // $render_array['basic_pages'] = [
+    //   '#theme' => 'item_list',
+    //   '#items' => $items,
+    // ];
     //dump($items);
 
     // Return the combined render array.
-    return $render_array;
+    //return $render_array; }
+
+    //Prepare the items for the list
+    // $items1 = [];
+    // foreach ($nodes as $node) {
+    //   $formatted_date = $this->dateFormatter->dateChange($node->getCreatedTime());
+    //   $items1[] = [
+    //     '#markup' => '<p>Created on: ' . $formatted_date . '</p>',
+    //   ];
+    // }
+    // dump($items1);
+
+    $items = [];
+    foreach ($nodes as $node) {
+        $formatted_date = $this->dateFormatter->dateChange($node->getCreatedTime());
+        $items[] = [
+            'title' => strip_tags($node->getTitle()),
+            'body' => strip_tags($node->body->value),
+            'date' => $formatted_date,
+        ];
+    }
+
+    return [
+        '#theme' => 'first_module_template',
+        '#first_msg' => $hello_world,
+        '#items' => $items, 
+    ];
   }
 }
